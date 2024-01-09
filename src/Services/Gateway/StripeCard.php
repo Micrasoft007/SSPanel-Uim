@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
-use App\Models\Paylist;
 use App\Models\Setting;
+use App\Models\Paylist;
 use App\Services\Auth;
+use App\Services\Exchange;
 use App\Services\View;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
+use RedisException;
 use Slim\Http\Response;
 use Slim\Http\ServerRequest;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
 use Stripe\StripeClient;
+use voku\helper\AntiXSS;
 
 final class StripeCard extends AbstractPayment
 {
@@ -34,52 +38,65 @@ final class StripeCard extends AbstractPayment
         return 'Stripe';
     }
 
+    /**
+     * @throws GuzzleException
+     * @throws RedisException
+     */
     public function purchase(ServerRequest $request, Response $response, array $args): ResponseInterface
     {
-        $trade_no = uniqid();
-        $user = Auth::getUser();
-        $configs = Setting::getClass('stripe');
-        $price = $request->getParam('price');
+        $antiXss = new AntiXSS();
 
+        $price = $antiXss->xss_clean($request->getParam('price'));
+        $invoice_id = $antiXss->xss_clean($request->getParam('invoice_id'));
+        $trade_no = self::generateGuid();
+
+        if ($price < Setting::obtain('stripe_min_recharge') ||
+            $price > Setting::obtain('stripe_max_recharge')
+        ) {
+            return $response->withJson([
+                'ret' => 0,
+                'msg' => '非法的金额',
+            ]);
+        }
+
+        $user = Auth::getUser();
         $pl = new Paylist();
+
         $pl->userid = $user->id;
         $pl->total = $price;
+        $pl->invoice_id = $invoice_id;
         $pl->tradeno = $trade_no;
         $pl->save();
 
-        $params = [
-            'trade_no' => $trade_no,
-            'sign' => md5($trade_no . ':' . $configs['stripe_webhook_key']),
-        ];
+        $exchange_amount = Exchange::exchange($price, 'CNY', Setting::obtain('stripe_currency'));
 
-        $exchange_amount = $price / self::exchange($configs['stripe_currency']) * 100;
-
-        Stripe::setApiKey($configs['stripe_sk']);
+        Stripe::setApiKey(Setting::obtain('stripe_sk'));
         $session = null;
 
         try {
             $session = Session::create([
                 'customer_email' => $user->email,
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => $configs['stripe_currency'],
-                        'product_data' => [
-                            'name' => 'Account Recharge',
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => Setting::obtain('stripe_currency'),
+                            'product_data' => [
+                                'name' => 'Account Recharge',
+                            ],
+                            'unit_amount' => (int) $exchange_amount,
                         ],
-                        'unit_amount' => (int) $exchange_amount,
+                        'quantity' => 1,
                     ],
-                    'quantity' => 1,
-                ],
                 ],
                 'mode' => 'payment',
-                'success_url' => self::getUserReturnUrl() .
-                    '?session_id={CHECKOUT_SESSION_ID}&' . http_build_query($params),
+                'client_reference_id' => $trade_no,
+                'success_url' => self::getUserReturnUrl() . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => $_ENV['baseUrl'] . '/user/invoice',
             ]);
         } catch (ApiErrorException $e) {
             return $response->withJson([
                 'ret' => 0,
-                'msg' => $e->getMessage(),
+                'msg' => 'Stripe API error',
             ]);
         }
 
@@ -101,14 +118,9 @@ final class StripeCard extends AbstractPayment
 
     public function getReturnHTML($request, $response, $args): ResponseInterface
     {
-        $sign = $request->getParam('sign');
-        $trade_no = $request->getParam('trade_no');
-        $session_id = $request->getParam('session_id');
+        $antiXss = new AntiXSS();
 
-        $_sign = md5($trade_no . ':' . Setting::obtain('stripe_webhook_key'));
-        if ($_sign !== $sign) {
-            die('error_sign');
-        }
+        $session_id = $antiXss->xss_clean($request->getParam('session_id'));
 
         $stripe = new StripeClient(Setting::obtain('stripe_sk'));
         $session = null;
@@ -118,12 +130,12 @@ final class StripeCard extends AbstractPayment
         } catch (ApiErrorException $e) {
             return $response->withJson([
                 'ret' => 0,
-                'msg' => $e->getMessage(),
+                'msg' => 'Stripe API error',
             ]);
         }
 
-        if ($session->payment_status === 'paid') {
-            $this->postPayment($trade_no);
+        if ($session !== null && $session->payment_status === 'paid') {
+            $this->postPayment($session->client_reference_id);
         }
 
         return $response->withRedirect($_ENV['baseUrl'] . '/user/invoice');

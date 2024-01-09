@@ -9,8 +9,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{$config['appName']}</title>
     <!-- CSS files -->
-    <link href="//{$config['jsdelivr_url']}/npm/@tabler/core@latest/dist/css/tabler.min.css" rel="stylesheet" />
-    <link href="//{$config['jsdelivr_url']}/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" />
+    <!-- <link href="//{$config['jsdelivr_url']}/npm/@tabler/core@latest/dist/css/tabler.min.css" rel="stylesheet" /> -->
+    <!-- <link href="//{$config['jsdelivr_url']}/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" /> -->
+    <link href="/assets/css/tabler-icons.min.css" rel="stylesheet" />
+    <link href="/assets/css/tabler.min.css" rel="stylesheet" />
     <link href="//cdn.datatables.net/v/bs5/dt-1.13.5/datatables.min.css" rel="stylesheet" />
     <!-- JS files -->
     <script src="//{$config['jsdelivr_url']}/npm/qrcode_js@latest/qrcode.min.js"></script>

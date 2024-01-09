@@ -355,7 +355,7 @@ final class AuthController extends BaseController
             $gift_user = User::where('id', $user_invite->user_id)->first();
 
             if ($gift_user === null || $gift_user->invite_num === 0) {
-                return ResponseHelper::error($response, '邀请码无效');
+                return ResponseHelper::error($response, '邀请码无效,邀请人无可邀请数量');
             }
         }
 

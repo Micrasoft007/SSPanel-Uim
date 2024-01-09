@@ -245,7 +245,8 @@
                                                     {else}
                                                         href="/clients/v2rayN-Core.zip"
                                                     {/if}
-                                                   class="btn btn-primary">
+                                                   class="btn btn-primary"
+												   onclick="javascript:alert('点击确定开始下载')">
                                                     下载 v2rayN（Windows）
                                                 </a>
                                                 <a {if $config['enable_r2_client_download']}
@@ -253,7 +254,8 @@
                                                     {else}
                                                         href="/clients/v2rayNG.apk"
                                                     {/if}
-                                                   class="btn btn-primary">
+                                                   class="btn btn-primary"
+												   onclick="javascript:alert('点击确定开始下载')">
                                                     下载 v2rayNG（Android）
                                                 </a>
                                             </div>

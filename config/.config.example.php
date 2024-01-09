@@ -140,3 +140,9 @@ $_ENV['r2_account_id'] = '';
 $_ENV['r2_access_key_id'] = '';
 $_ENV['r2_access_key_secret'] = '';
 $_ENV['r2_client_download_timeout'] = 10;
+
+#在套了CDN之后获取用户真实ip，如果您不知道这是什么，请不要乱动
+if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+$list = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+$_SERVER['REMOTE_ADDR'] = $list[0];
+}
