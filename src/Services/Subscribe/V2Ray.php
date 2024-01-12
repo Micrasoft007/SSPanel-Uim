@@ -45,6 +45,9 @@ final class V2Ray extends Base
                 //默認值有問題的請懂 V2 怎麽用的人來改一改。
                 $alter_id = $node_custom_config['alter_id'] ?? '0';
                 $security = $node_custom_config['security'] ?? 'none';
+                $sni = $node_custom_config['sni'] ?? '';
+                $pbk = $node_custom_config['pbk'] ?? '';
+                $flow = $node_custom_config['flow'] ?? '';
                 $network = $node_custom_config['network'] ?? '';
                 $header = $node_custom_config['header'] ?? ['type' => 'none'];
                 $header_type = $header['type'] ?? '';
@@ -65,8 +68,24 @@ final class V2Ray extends Base
                     'path' => $path,
                     'tls' => $security,
                 ];
-
-                $links .= 'vmess://' . base64_encode(json_encode($v2rayn_array)) . PHP_EOL;
+                if (($node_custom_config['enable_vless'] ?? '0') === '1'){
+                    $vless_array = [
+                        'name' => $node_raw->name,
+                        'uuid' => $user->uuid,
+                        'server' => $server,
+                        'port' => $v2_port,
+                        'encryption' => 'none',
+                        'flow' => 'xtls-rprx-vision',
+                        'security' => 'none',
+                        'type' => 'tcp',
+                        'headerType' => 'none',
+                    ];
+                    $links .= 'vless://' . $user->uuid . '@' . $server . ':' . $v2_port . '?encryption=none&flow='.$flow.'&security=reality&sni='.$sni.'&fp=chrome&pbk='.$pbk.'&type=tcp&headerType=none#' . $node_raw->name . PHP_EOL;
+                    // $links .= 'vless://' . base64_encode(json_encode($vless_array, 320)) . PHP_EOL;
+                }else{
+                     $links .= 'vmess://' . base64_encode(json_encode($v2rayn_array, 320)) . PHP_EOL;
+                }
+               
             }
         }
 
