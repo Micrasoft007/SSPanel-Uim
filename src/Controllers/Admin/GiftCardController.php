@@ -70,7 +70,7 @@ final class GiftCardController extends BaseController
     {
         $card_number = $request->getParam('card_number') ?? 0;
         $card_value = $request->getParam('card_value') ?? 0;
-        $card_length = $request->getParam('card_length') ?? 0;
+        $card_length = intval($request->getParam('card_length') ?? 0);
         $card_added = '';
 
         if ($card_number === '' || $card_number <= 0) {
