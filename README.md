@@ -25,6 +25,8 @@
 
 SSPanel UIM 是一款专为 Shadowsocks / V2Ray / Trojan 协议设计的多用途代理服务销售管理系统。
 
+本人只针对2023.5版本进行了一些优化和bug修复使其可直接投入运营，并增加了支持VLESS+xtls-rprx-vision+Reality（优化后分支名为2023.5.1），想用最新版本还是请以原作者为准
+
 ## 特性
 
 - 集成 支付宝当面付，Stripe 银行卡，彩虹易支付 等多种支付系统
