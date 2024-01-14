@@ -107,7 +107,7 @@ final class UserController extends BaseController
             foreach ($keys_unset as $key) {
                 unset($user_raw->$key);
             }
-
+            $user_raw->flow = "xtls-rprx-vision";
             $users[] = $user_raw;
         }
 
