@@ -27,6 +27,14 @@ SSPanel UIM 是一款专为 Shadowsocks / V2Ray / Trojan 协议设计的多用�
 
 本人只针对2023.5版本进行了一些优化和bug修复使其可直接投入运营，并增加了支持VLESS+xtls-rprx-vision+Reality（优化后分支名为2023.5.2），想用最新版本还是请以原作者为准
 
+## 已修复问题
+
+- 修复支付宝当面付无法显示二维码
+- 修复节点在线人数显示异常
+- 修复支持后端对接VLESS+xtls-rprx-vision+Reality节点
+- 修复用户同步到节点服务器缺少flow参数
+- 修复添加礼品卡报错
+
 ## 特性
 
 - 集成 支付宝当面付，Stripe 银行卡，彩虹易支付 等多种支付系统
