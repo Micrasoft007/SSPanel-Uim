@@ -6,6 +6,7 @@ namespace App\Controllers\User;
 
 use App\Controllers\BaseController;
 use App\Models\Node;
+use App\Services\DB;
 use App\Utils\Tools;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
@@ -38,6 +39,20 @@ final class ServerController extends BaseController
             if ($node->node_bandwidth_limit !== 0 && $node->node_bandwidth_limit <= $node->node_bandwidth) {
                 continue;
             }
+			
+			$logs = DB::select("
+            SELECT
+                id,
+                node_id,
+                last_time
+            FROM
+                online_log
+            WHERE
+                node_id = '{$node->id}'
+                AND last_time > UNIX_TIMESTAMP() - 90
+			");
+
+			$count = count($logs);
 
             $array_node = [];
             $array_node['id'] = $node->id;
@@ -45,7 +60,7 @@ final class ServerController extends BaseController
             $array_node['class'] = (int) $node->node_class;
             $array_node['color'] = $node->color;
             $array_node['sort'] = $node->sort();
-            $array_node['online_user'] = $node->online_user;
+            $array_node['online_user'] = $count;
             $array_node['online'] = $node->getNodeOnlineStatus();
             $array_node['traffic_rate'] = $node->traffic_rate;
             $array_node['node_bandwidth'] = Tools::autoBytes($node->node_bandwidth);
