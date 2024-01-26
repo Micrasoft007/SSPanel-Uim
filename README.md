@@ -34,6 +34,7 @@ SSPanel UIM 是一款专为 Shadowsocks / V2Ray / Trojan 协议设计的多用�
 - 修复支持后端对接VLESS+xtls-rprx-vision+Reality节点
 - 修复用户同步到节点服务器缺少flow参数
 - 修复添加礼品卡报错
+- 添加支持中转VLESS+reality节点
 
 ## 特性
 
