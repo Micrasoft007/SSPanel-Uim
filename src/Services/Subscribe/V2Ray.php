@@ -48,6 +48,8 @@ final class V2Ray extends Base
                 $sni = $node_custom_config['sni'] ?? '';
                 $pbk = $node_custom_config['pbk'] ?? '';
                 $flow = $node_custom_config['flow'] ?? '';
+				$transit_address = $node_custom_config['transit_address'] ?? '';
+				$transit_port = $node_custom_config['transit_port'] ?? '';
                 $network = $node_custom_config['network'] ?? '';
                 $header = $node_custom_config['header'] ?? ['type' => 'none'];
                 $header_type = $header['type'] ?? '';
@@ -69,19 +71,11 @@ final class V2Ray extends Base
                     'tls' => $security,
                 ];
                 if (($node_custom_config['enable_vless'] ?? '0') === '1'){
-                    $vless_array = [
-                        'name' => $node_raw->name,
-                        'uuid' => $user->uuid,
-                        'server' => $server,
-                        'port' => $v2_port,
-                        'encryption' => 'none',
-                        'flow' => 'xtls-rprx-vision',
-                        'security' => 'none',
-                        'type' => 'tcp',
-                        'headerType' => 'none',
-                    ];
-                    $links .= 'vless://' . $user->uuid . '@' . $server . ':' . $v2_port . '?encryption=none&flow='.$flow.'&security=reality&sni='.$sni.'&fp=chrome&pbk='.$pbk.'&type=tcp&headerType=none#' . $node_raw->name . PHP_EOL;
-                    // $links .= 'vless://' . base64_encode(json_encode($vless_array, 320)) . PHP_EOL;
+					if (($node_custom_config['enable_transit'] ?? '0') === '1'){
+						$links .= 'vless://' . $user->uuid . '@' . $transit_address . ':' . $transit_port . '?encryption=none&flow='.$flow.'&security=reality&sni='.$sni.'&fp=chrome&pbk='.$pbk.'&type=tcp&headerType=none#' . $node_raw->name . PHP_EOL;
+					}else{
+						$links .= 'vless://' . $user->uuid . '@' . $server . ':' . $v2_port . '?encryption=none&flow='.$flow.'&security=reality&sni='.$sni.'&fp=chrome&pbk='.$pbk.'&type=tcp&headerType=none#' . $node_raw->name . PHP_EOL;
+					}
                 }else{
                      $links .= 'vmess://' . base64_encode(json_encode($v2rayn_array, 320)) . PHP_EOL;
                 }
